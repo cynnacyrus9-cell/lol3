@@ -1,0 +1,53 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "roadster-life-analytics",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-10-01",
+  "observability": { "enabled": true },
+
+  // The React dashboard. Static asset requests are served by Cloudflare without
+  // invoking the Worker (they do not count against the 100,000 requests/day).
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/ingest", "/auth/*"]
+  },
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "roadster-analytics",
+      // Replace with the id printed by: npx wrangler d1 create roadster-analytics
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "migrations"
+    }
+  ],
+
+  // One SQLite-backed Durable Object (available on the Workers Free plan) is the
+  // real-time hub: ingestion, WebSocket fan-out, official polling, aggregation.
+  "durable_objects": {
+    "bindings": [{ "name": "HUB", "class_name": "AnalyticsHub" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["AnalyticsHub"] }],
+
+  // Watchdog only (144 invocations/day). Live work runs on the Durable Object alarm.
+  "triggers": { "crons": ["*/10 * * * *"] },
+
+  "vars": {
+    "APP_MODE": "production",
+    "AUTH_MODE": "access",
+    "GAME_NAME": "Roadster Life",
+    "REPORTING_TIMEZONE": "America/Los_Angeles",
+    "ROBLOX_UNIVERSE_ID": "",
+    "ROBLOX_PLACE_ID": "",
+    "ROBLOX_GROUP_ID": "",
+    "ACCESS_TEAM_DOMAIN": "",
+    "ACCESS_AUD": "",
+    "ACCESS_ALLOWED_EMAILS": "",
+    "CF_ACCOUNT_ID": "",
+    "INGEST_REQUIRE_HMAC": "false",
+    "OFFICIAL_POLL_SEC": "30",
+    "ALLOWED_ORIGINS": ""
+  }
+}

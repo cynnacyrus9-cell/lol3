@@ -1,0 +1,15 @@
+{
+  "name": "RoadsterAnalytics",
+  "tree": {
+    "$className": "DataModel",
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "RoadsterAnalytics": {
+        "$path": "src/ServerScriptService/RoadsterAnalytics"
+      },
+      "RoadsterAnalyticsBootstrap": {
+        "$path": "src/ServerScriptService/RoadsterAnalyticsBootstrap.server.luau"
+      }
+    }
+  }
+}

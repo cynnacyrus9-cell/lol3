@@ -10,7 +10,7 @@ export const SERIES = {
   tertiary: 'var(--color-series-3)',
 }
 // Recharts needs concrete colors for some SVG attributes.
-export const HEX = { primary: '#3987e5', secondary: '#d95926', tertiary: '#199e70', surface: '#101012', grid: '#1d1d22', axis: '#898781' }
+export const HEX = { primary: '#25a58e', secondary: '#d96c33', tertiary: '#5b8def', surface: '#172a31', grid: '#223b44', axis: '#84a2a7' }
 
 export function ChartFrame({
   title,
@@ -105,7 +105,7 @@ export function ChartTooltip({
 }) {
   if (!active || !payload?.length || label === undefined) return null
   return (
-    <div className="rounded-lg border border-line-strong bg-[#141418]/95 px-3 py-2 text-xs shadow-xl backdrop-blur">
+    <div className="rounded-lg border border-line-strong bg-[#12232a]/95 px-3 py-2 text-xs shadow-xl backdrop-blur">
       <div className="mb-1 font-medium text-ink">{labelFormat(label)}</div>
       {payload.map((p) => (
         <div key={String(p.dataKey)} className="flex items-center justify-between gap-4">

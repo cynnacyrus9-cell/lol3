@@ -57,7 +57,7 @@ function Section({ title, description, children, actions }: { title: string; des
 
 function Notice({ kind, children }: { kind: 'ok' | 'error'; children: React.ReactNode }) {
   return (
-    <div className={cn('mt-3 rounded-lg border px-3 py-2 text-[13px]', kind === 'ok' ? 'border-good/30 bg-good/10 text-[#39d239]' : 'border-critical/30 bg-critical/10 text-[#ff9b9b]')} role="status">
+    <div className={cn('mt-3 rounded-lg border px-3 py-2 text-[13px]', kind === 'ok' ? 'border-good/30 bg-good/10 text-[#4ee39a]' : 'border-critical/30 bg-critical/10 text-[#ff9b9b]')} role="status">
       {children}
     </div>
   )
@@ -307,7 +307,7 @@ function SecretsPanel({ config }: { config: PublicConfig }) {
       <ul className="divide-y divide-line">
         {Object.entries(config.secrets).map(([k, set]) => (
           <li key={k} className="flex items-start gap-3 py-2.5">
-            {set ? <CheckCircle2 className="mt-0.5 size-4 text-[#39d239]" aria-label="Configured" /> : <CircleSlash className="mt-0.5 size-4 text-faint" aria-label="Not set" />}
+            {set ? <CheckCircle2 className="mt-0.5 size-4 text-[#4ee39a]" aria-label="Configured" /> : <CircleSlash className="mt-0.5 size-4 text-faint" aria-label="Not set" />}
             <div className="min-w-0 flex-1">
               <div className="font-mono text-[12px] text-ink">{k}</div>
               <div className="text-[11px] text-muted">{SECRET_HELP[k]}</div>
@@ -452,7 +452,7 @@ function IntegrationPanel() {
                       <td className="tabular py-1.5 text-right">{b.players ?? '—'}</td>
                       <td className="tabular py-1.5 text-right">{b.duplicates}</td>
                       <td className="py-1.5 text-right">
-                        {b.status === 200 ? <span className="text-[#39d239]">200 OK</span> : <span className="text-[#ff9b9b]" title={b.error}>{b.status} {b.error}</span>}
+                        {b.status === 200 ? <span className="text-[#4ee39a]">200 OK</span> : <span className="text-[#ff9b9b]" title={b.error}>{b.status} {b.error}</span>}
                       </td>
                     </tr>
                   ))}

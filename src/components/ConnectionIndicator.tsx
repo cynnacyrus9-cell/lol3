@@ -10,7 +10,7 @@ export function ConnectionIndicator({ compact = false }: { compact?: boolean }) 
   const retryIn = connection.nextRetryAt ? Math.max(0, Math.ceil((connection.nextRetryAt - now) / 1000)) : null
   const meta =
     s === 'live'
-      ? { label: 'LIVE', cls: 'border-good/40 bg-good/10 text-[#39d239]', icon: Radio, help: 'Connected over WebSocket. Updates arrive as soon as the backend receives them.' }
+      ? { label: 'LIVE', cls: 'border-good/40 bg-good/10 text-[#4ee39a]', icon: Radio, help: 'Connected over WebSocket. Updates arrive as soon as the backend receives them.' }
       : s === 'fallback'
         ? { label: 'LIVE (SSE)', cls: 'border-warning/40 bg-warning/10 text-warning', icon: Wifi, help: 'WebSockets are blocked on this network; using Server-Sent Events instead.' }
         : s === 'connecting'

@@ -77,6 +77,15 @@ export interface OfficialMetrics {
   pollSec: number
   visitsToday: number | null
   visitsTodayBaselineAt: number | null
+  /** Official visits in the rolling last 60 minutes / 24 hours (null until enough history exists). */
+  visitsLastHour: number | null
+  visitsLastDay: number | null
+  /** Average official visits per minute over the last 15 minutes. */
+  visitsPerMinute: number | null
+  upVotes: number | null
+  downVotes: number | null
+  /** Joins seen in-game since Roblox last changed its visit counter (live, not part of the official number). */
+  trackedJoinsSinceUpdate: number
 }
 
 export interface TodayStats {

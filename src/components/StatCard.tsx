@@ -24,7 +24,7 @@ export function Delta({ c }: { c: Comparison | null }) {
   const bad = c.invert ? up : down
   const Icon = up ? ArrowUpRight : down ? ArrowDownRight : Minus
   return (
-    <span className={cn('inline-flex items-center gap-0.5 text-[11px] font-medium', good && 'text-[#39d239]', bad && 'text-[#ff7b7b]', !good && !bad && 'text-muted')}>
+    <span className={cn('inline-flex items-center gap-0.5 text-[11px] font-medium', good && 'text-[#4ee39a]', bad && 'text-[#ff7b7b]', !good && !bad && 'text-muted')}>
       <Icon className="size-3.5" aria-hidden />
       <span className="tabular">{`${up ? '+' : ''}${(c.pct * 100).toFixed(Math.abs(c.pct) < 0.1 ? 1 : 0)}%`}</span>
       <span className="font-normal text-faint">vs {c.label}</span>

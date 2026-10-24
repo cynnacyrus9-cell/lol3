@@ -60,6 +60,19 @@ export async function fetchOfficialGame(universeId: string): Promise<OfficialGam
   }
 }
 
+/**
+ * Like/dislike counts (games.roblox.com/v1/games/votes?universeIds=…), used for
+ * the like ratio. Returns null when Roblox does not return the universe.
+ */
+export async function fetchVotes(universeId: string): Promise<{ upVotes: number; downVotes: number } | null> {
+  if (!/^\d{1,20}$/.test(universeId)) throw new Error('Universe ID must be numeric')
+  const body = (await getJson(`https://games.roblox.com/v1/games/votes?universeIds=${universeId}`)) as { data?: unknown }
+  const row = Array.isArray(body?.data) ? (body.data as Record<string, unknown>[]).find((d) => String(d.id) === universeId) : undefined
+  const up = num(row?.upVotes)
+  const down = num(row?.downVotes)
+  return up === null || down === null ? null : { upVotes: up, downVotes: down }
+}
+
 /** Resolves a place ID to its universe ID (apis.roblox.com/universes/v1/places/{id}/universe). */
 export async function lookupUniverseId(placeId: string): Promise<string> {
   if (!/^\d{1,20}$/.test(placeId)) throw new Error('Place ID must be numeric')

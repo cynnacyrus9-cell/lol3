@@ -66,7 +66,7 @@ export function LiveProvider({ children }: { children: React.ReactNode }) {
   soundRef.current = soundEnabled
 
   const pushToast = React.useCallback((t: Toast) => {
-    setToasts((cur) => [t, ...cur.filter((x) => x.id !== t.id)].slice(0, 4))
+    setToasts((cur) => [t, ...cur.filter((x) => x.id !== t.id)].slice(0, 3))
     window.setTimeout(() => setToasts((cur) => cur.filter((x) => x.id !== t.id)), t.kind === 'sale' ? 9000 : 12000)
   }, [])
 

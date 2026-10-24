@@ -17,6 +17,21 @@ Durable Object, and D1.
   updated. The **Data sources** page lists what is live, what is delayed, and what
   Roblox does not expose.
 
+### The dashboard
+
+One screen, tabs across the top: **Overview · Live Feed · Visits · Top Spenders · Products · Hourly · Daily**
+(plus *Data sources* and *Settings* icons in the header). The **Visits** tab is the
+main screen. It shows:
+
+- the official Roblox **total visits** as a huge live number, with players right now
+  and visits per minute
+- eight tiles: players now, visits today, visits in the last hour, visits in the last
+  day, peak players today, favorites, like ratio, and visits per sale
+- a **Players online** chart
+
+The theme is a dark petrol/teal palette, matched by eye to the reference screenshot.
+All colours are tokens at the top of `src/index.css`.
+
 ```
 Roblox game servers (Luau module)
    │  POST /ingest  (Secrets-store bearer token or HMAC; batched; purchases sent immediately)
@@ -70,6 +85,8 @@ you depend on the numbers.
 | Developer product sales | **Live** | Reported only after your handler returns `PurchaseGranted`. The amount is the receipt's `CurrencySpent`, deduplicated by `PurchaseId`. |
 | Game pass sales made in the experience | **Live** | `wasPurchased = true`, then ownership is confirmed with `UserOwnsGamePassAsync`. The amount is the list price from `GetProductInfo`. |
 | Developer products bought from the experience's Store tab | Delayed | Roblox runs `ProcessReceipt` when the buyer next joins a server. |
+| Visits in the last hour / last day, visits per minute | Delayed (polled) | Differences between stored official snapshots. Shown as "collecting history…" until enough history exists; never extrapolated across polling gaps. |
+| Like ratio | Delayed (polled) | `games.roblox.com/v1/games/votes` up/down votes. |
 | Official total visits, "playing", favorites | Delayed (polled) | One shared poller. Every 30 s while any dashboard is open (configurable, minimum 20 s), every 5 min otherwise. Backs off on 429/errors. A changed value is broadcast as soon as it is detected. |
 | Gross Robux | Live | Sum of verified purchases. |
 | Net Robux | Estimate | Gross × 70% (configurable), always labelled as an estimate. |

@@ -205,7 +205,7 @@ function Row({ label, cur, prev, format, hasPrev }: { label: string; cur: number
       <td className="py-2 pr-2 text-[13px] text-ink-2">{label}</td>
       <td className="tabular py-2 text-right text-[13px] font-medium text-ink">{format(cur)}</td>
       <td className="tabular py-2 text-right text-[13px] text-muted">{hasPrev ? format(prev) : '—'}</td>
-      <td className={`tabular py-2 pl-2 text-right text-[12px] ${pct === null ? 'text-faint' : pct >= 0 ? 'text-[#39d239]' : 'text-[#ff7b7b]'}`}>
+      <td className={`tabular py-2 pl-2 text-right text-[12px] ${pct === null ? 'text-faint' : pct >= 0 ? 'text-[#4ee39a]' : 'text-[#ff7b7b]'}`}>
         {pct === null ? '—' : `${pct >= 0 ? '▲ +' : '▼ '}${(pct * 100).toFixed(0)}%`}
       </td>
     </tr>

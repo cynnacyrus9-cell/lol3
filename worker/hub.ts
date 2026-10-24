@@ -22,7 +22,7 @@ import { appMode, authMode, secretStatus, type AppMode, type Env } from './env'
 import { Db, sourceFilter } from './db'
 import { applyConfigPatch, configFromRows, CONFIG_KEYS, type AppConfig } from './config'
 import { computeBudget, emptyUsage, usageReport, utcDay, type UsageCounters } from './usage'
-import { fetchOfficialGame, lookupUniverseId, nextPollDelayMs, RobloxRateLimitError, verifyOpenCloudKey } from './roblox'
+import { fetchOfficialGame, fetchVotes, lookupUniverseId, nextPollDelayMs, RobloxRateLimitError, verifyOpenCloudKey } from './roblox'
 import { fetchCloudflareUsage, type CloudflareUsage } from './cfusage'
 import { validateBatch, ValidationError, MAX_BODY_BYTES } from './validate'
 import { checkPassword, createSessionCookie, passwordModeReady } from './auth'
@@ -78,6 +78,10 @@ interface OfficialHot {
   nextPollAt: number
   lastSnapshotAt: number
   baseline: { day: string; visits: number; at: number } | null
+  upVotes?: number | null
+  downVotes?: number | null
+  windows?: { lastHour: number | null; lastDay: number | null; perMinute: number | null; at: number }
+  joinsSinceUpdate?: number
 }
 
 interface Meta {
@@ -519,7 +523,27 @@ export class AnalyticsHub extends DurableObject<Env> {
     const baseline = o.baseline && o.baseline.day === this.meta.today.dayKey ? o.baseline : null
     if (!this.config.universeId) {
       // Never show numbers for a universe that is no longer configured.
-      return { status, visits: null, playing: null, favorites: null, name: null, rootPlaceId: null, fetchedAt: null, changedAt: null, lastError: null, nextPollAt: null, pollSec, visitsToday: null, visitsTodayBaselineAt: null }
+      return {
+        status,
+        visits: null,
+        playing: null,
+        favorites: null,
+        name: null,
+        rootPlaceId: null,
+        fetchedAt: null,
+        changedAt: null,
+        lastError: null,
+        nextPollAt: null,
+        pollSec,
+        visitsToday: null,
+        visitsTodayBaselineAt: null,
+        visitsLastHour: null,
+        visitsLastDay: null,
+        visitsPerMinute: null,
+        upVotes: null,
+        downVotes: null,
+        trackedJoinsSinceUpdate: 0,
+      }
     }
     return {
       status,
@@ -535,6 +559,12 @@ export class AnalyticsHub extends DurableObject<Env> {
       pollSec,
       visitsToday: baseline && o.visits !== null ? Math.max(0, o.visits - baseline.visits) : null,
       visitsTodayBaselineAt: baseline?.at ?? null,
+      visitsLastHour: o.windows?.lastHour ?? null,
+      visitsLastDay: o.windows?.lastDay ?? null,
+      visitsPerMinute: o.windows?.perMinute ?? null,
+      upVotes: o.upVotes ?? null,
+      downVotes: o.downVotes ?? null,
+      trackedJoinsSinceUpdate: o.joinsSinceUpdate ?? 0,
     }
   }
 
@@ -710,6 +740,8 @@ export class AnalyticsHub extends DurableObject<Env> {
           return json(await this.activity(url))
         case '/api/insights':
           return json(await this.insights())
+        case '/api/top-spenders':
+          return json(await this.topSpenders(url))
         case '/api/export.csv':
           return this.exportCsv(url)
         case '/api/admin/usage':
@@ -1101,6 +1133,7 @@ export class AnalyticsHub extends DurableObject<Env> {
         if (d === today.dayKey) today.trackedVisits += 1
         else dirtyDays.add(d)
         this.recentJoins.push(r.started_at)
+        if (r.started_at >= (this.meta.official.changedAt ?? 0)) this.meta.official.joinsSinceUpdate = (this.meta.official.joinsSinceUpdate ?? 0) + 1
       }
       // Sessions created only to close a missed join are not shown as "joined".
       const stillHere = server.players[String(r.user_id)]?.j === r.started_at
@@ -1482,7 +1515,22 @@ export class AnalyticsHub extends DurableObject<Env> {
         lastError: null,
         nextPollAt: now + nextPollDelayMs(pollSec, 0),
       })
-      if (visitsChanged) o.changedAt = now
+      if (visitsChanged) {
+        o.changedAt = now
+        o.joinsSinceUpdate = 0
+      }
+      // Like ratio is optional: a failure here never blocks the visit count.
+      try {
+        usage.roblox.requests += 1
+        const votes = await fetchVotes(universeId)
+        if (votes) {
+          if (votes.upVotes !== o.upVotes || votes.downVotes !== o.downVotes) this.metaDirty = true
+          o.upVotes = votes.upVotes
+          o.downVotes = votes.downVotes
+        }
+      } catch {
+        usage.roblox.errors += 1
+      }
       const today = this.meta.today.dayKey
       if (!o.baseline || o.baseline.day !== today) o.baseline = { day: today, visits: g.visits, at: now }
       // Persist when the counters change, and at least hourly for day boundaries.
@@ -1496,6 +1544,7 @@ export class AnalyticsHub extends DurableObject<Env> {
         )
         o.lastSnapshotAt = now
       }
+      await this.computeOfficialWindows(now)
       this.metaDirty = true
       // Broadcast as soon as a new verified value is detected.
       if (changed) this.broadcastLive()
@@ -1509,6 +1558,34 @@ export class AnalyticsHub extends DurableObject<Env> {
       o.nextPollAt = now + nextPollDelayMs(pollSec, o.failures, retryAfter)
       this.metaDirty = true
       if (force) throw new HttpError(502, `Roblox request failed: ${o.lastError}`)
+    }
+  }
+
+  /**
+   * Rolling official visit windows from stored snapshots. The counter is a step
+   * function written on every change (and at least hourly), so "the last
+   * snapshot at or before t" is its value at t — unless the poller was off,
+   * in which case the window is reported as unknown instead of guessed.
+   */
+  private async computeOfficialWindows(now: number): Promise<void> {
+    const o = this.meta.official
+    if (o.visits === null) return
+    const at = (t: number) =>
+      this.db.prepare(`SELECT fetched_at, visits FROM official_snapshots WHERE fetched_at <= ? AND visits IS NOT NULL ORDER BY fetched_at DESC LIMIT 1`, t)
+    const res = await this.db.batch([at(now - 3_600_000), at(now - 86_400_000), at(now - 15 * 60_000)])
+    const value = (i: number, t: number): number | null => {
+      const row = res[i].results?.[0] as { fetched_at: number; visits: number } | undefined
+      // A snapshot much older than t means there is a gap in polling.
+      return row && t - row.fetched_at <= 75 * 60_000 ? row.visits : null
+    }
+    const h = value(0, now - 3_600_000)
+    const d = value(1, now - 86_400_000)
+    const q = value(2, now - 15 * 60_000)
+    o.windows = {
+      lastHour: h === null ? null : Math.max(0, o.visits - h),
+      lastDay: d === null ? null : Math.max(0, o.visits - d),
+      perMinute: q === null ? null : Math.max(0, o.visits - q) / 15,
+      at: now,
     }
   }
 
@@ -1947,6 +2024,23 @@ export class AnalyticsHub extends DurableObject<Env> {
     const includeTest = url.searchParams.get('includeTest') === '1'
     const events = await this.activityRows({ limit, before, categories: cats.length ? cats : null, includeTest })
     return { events, hasMore: events.length === limit }
+  }
+
+  private async topSpenders(url: URL) {
+    const range = this.parseRange(url)
+    const rows = await this.cached(`rev:spenders:${range.startMs}:${Math.floor(range.endMs / 30_000)}`, 30_000, () =>
+      this.db.all<{ user_id: number; username: string | null; robux: number; purchases: number; last_at: number; first_at: number }>(
+        `SELECT user_id, MAX(username) AS username, SUM(robux) AS robux, COUNT(*) AS purchases, MAX(purchased_at) AS last_at, MIN(purchased_at) AS first_at
+         FROM purchases WHERE ${sourceFilter(this.mode)} AND purchased_at >= ? AND purchased_at < ? AND user_id IS NOT NULL
+         GROUP BY user_id ORDER BY robux DESC, purchases DESC LIMIT 50`,
+        range.startMs,
+        range.endMs,
+      ),
+    )
+    return {
+      range,
+      spenders: rows.map((r) => ({ userId: r.user_id, username: r.username, robux: r.robux, purchases: r.purchases, lastAt: r.last_at, firstAt: r.first_at })),
+    }
   }
 
   private async insights() {

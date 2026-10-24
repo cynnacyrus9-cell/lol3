@@ -129,6 +129,18 @@ describe('purchases', () => {
     expect(row?.amount_source).toBe('list_price')
   })
 
+  it('ranks top spenders by Robux', async () => {
+    const big = uid()
+    const small = uid()
+    await ingestOk(batch(jobId(), { events: [purchase(big, `p-${crypto.randomUUID()}`, 800), purchase(big, `p-${crypto.randomUUID()}`, 200), purchase(small, `p-${crypto.randomUUID()}`, 5)] }))
+    const r = await api<{ spenders: { userId: number; robux: number; purchases: number }[] }>('/api/top-spenders?range=today')
+    expect(r.status).toBe(200)
+    const a = r.body.spenders.findIndex((s) => s.userId === big)
+    const b = r.body.spenders.findIndex((s) => s.userId === small)
+    expect(r.body.spenders[a]).toMatchObject({ robux: 1000, purchases: 2 })
+    expect(a).toBeLessThan(b)
+  })
+
   it('rejects developer product purchases without a receipt PurchaseId', async () => {
     const res = await ingest(batch(jobId(), { events: [{ ...purchase(uid(), 'x'), purchaseId: undefined }] }))
     expect(res.status).toBe(400)

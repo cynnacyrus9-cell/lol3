@@ -3,37 +3,38 @@
 /* Roadster Life Analytics — dark-only theme tokens */
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  --color-bg: #08080a;
-  --color-panel: #0e0e11;
-  --color-card: #101012;
-  --color-card-hover: #141418;
-  --color-raised: #17171b;
-  --color-line: #1f1f25;
-  --color-line-strong: #2a2a32;
-  --color-ink: #f0efec;
-  --color-ink-2: #c3c2b7;
-  --color-muted: #898781;
-  --color-faint: #5d5c58;
+  /* Deep petrol / slate-teal theme (matched to the reference screen) */
+  --color-bg: #0e1c22;
+  --color-panel: #12232a;
+  --color-card: #172a31;
+  --color-card-hover: #1b3139;
+  --color-raised: #1e343c;
+  --color-line: #24404a;
+  --color-line-strong: #2f4f5a;
+  --color-ink: #eaf5f4;
+  --color-ink-2: #b4cdcf;
+  --color-muted: #84a2a7;
+  --color-faint: #5b7a81;
 
-  --color-accent: #3b9eff;
-  --color-accent-strong: #1d7ef0;
-  --color-accent-soft: rgba(59, 158, 255, 0.12);
+  --color-accent: #3ddbb4;
+  --color-accent-strong: #22c39c;
+  --color-accent-soft: rgba(61, 219, 180, 0.12);
 
-  /* Chart series (validated for the dark card surface) */
-  --color-series-1: #3987e5;
-  --color-series-2: #d95926;
-  --color-series-3: #199e70;
+  /* Chart series (validated for the dark card surface #172a31) */
+  --color-series-1: #25a58e;
+  --color-series-2: #d96c33;
+  --color-series-3: #5b8def;
 
   /* Status (always paired with an icon + label) */
-  --color-good: #0ca30c;
+  --color-good: #2fd27a;
   --color-warning: #fab219;
   --color-serious: #ec835a;
-  --color-critical: #d03b3b;
+  --color-critical: #e05252;
 
-  --radius-card: 14px;
-  --shadow-glow: 0 0 0 1px rgba(59, 158, 255, 0.25), 0 0 24px rgba(59, 158, 255, 0.12);
+  --radius-card: 12px;
+  --shadow-glow: 0 0 0 1px rgba(61, 219, 180, 0.3), 0 0 26px rgba(61, 219, 180, 0.14);
 }
 
 :root {
@@ -53,7 +54,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background:
-    radial-gradient(1200px 600px at 85% -10%, rgba(59, 158, 255, 0.07), transparent 60%),
+    radial-gradient(1100px 520px at 50% -12%, rgba(61, 219, 180, 0.08), transparent 62%),
     var(--color-bg);
 }
 
@@ -62,7 +63,7 @@ body {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #15151a 0%, #1c1c22 40%, #15151a 80%);
+  background: linear-gradient(90deg, #172a31 0%, #1f3740 40%, #172a31 80%);
   background-size: 200% 100%;
   animation: shimmer 1.4s ease-in-out infinite;
 }
@@ -79,9 +80,9 @@ body {
 .toast-in { animation: toast-in 280ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(12, 163, 12, 0.55); }
-  70% { box-shadow: 0 0 0 7px rgba(12, 163, 12, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(12, 163, 12, 0); }
+  0% { box-shadow: 0 0 0 0 rgba(47, 210, 122, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(47, 210, 122, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(47, 210, 122, 0); }
 }
 .live-dot { animation: pulse-ring 2s infinite; }
 
@@ -92,7 +93,7 @@ body {
 .flash { animation: flash-accent 1.6s ease-out; }
 
 @keyframes feed-in {
-  from { opacity: 0; transform: translateX(-6px); background: rgba(59, 158, 255, 0.1); }
+  from { opacity: 0; transform: translateX(-6px); background: rgba(61, 219, 180, 0.1); }
   to { opacity: 1; transform: none; background: transparent; }
 }
 .feed-in { animation: feed-in 600ms ease-out both; }
@@ -102,12 +103,29 @@ body {
 }
 
 /* Recharts chrome */
-.recharts-cartesian-grid line { stroke: #1d1d22; }
-.recharts-text { fill: #898781; font-size: 11px; }
-.recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line { stroke: #2a2a32; }
-.recharts-tooltip-cursor { stroke: #3a3a44; }
+.recharts-cartesian-grid line { stroke: #223b44; }
+.recharts-text { fill: #84a2a7; font-size: 11px; }
+.recharts-cartesian-axis-line, .recharts-cartesian-axis-tick-line { stroke: #2f4f5a; }
+.recharts-tooltip-cursor { stroke: #3f6370; }
 .recharts-surface:focus, .recharts-wrapper:focus, .recharts-sector:focus { outline: none; }
 
 ::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-thumb { background: #22222a; border-radius: 8px; border: 2px solid var(--color-bg); }
+::-webkit-scrollbar-thumb { background: #24404a; border-radius: 8px; border: 2px solid var(--color-bg); }
 ::-webkit-scrollbar-track { background: transparent; }
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.hero-number {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  text-shadow: 0 0 28px rgba(61, 219, 180, 0.28), 0 0 2px rgba(255, 255, 255, 0.35);
+}
+.label-caps { font-size: 10.5px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
+.no-scrollbar { scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@keyframes tick-up {
+  0% { color: #6ff0cf; }
+  100% { color: inherit; }
+}
+.tick-up { animation: tick-up 1.2s ease-out; }

@@ -8,7 +8,8 @@ import path from 'node:path'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: { alias: { '@': path.resolve(import.meta.dirname, 'src'), '@shared': path.resolve(import.meta.dirname, 'shared') } },
-  build: { outDir: 'dist/client', emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 900 },
+  // Fonts must be real files: the CSP only allows font-src 'self'.
+  build: { outDir: 'dist/client', emptyOutDir: true, sourcemap: false, chunkSizeWarningLimit: 900, assetsInlineLimit: 0 },
   server: {
     proxy: {
       '/api': { target: 'http://localhost:8787', ws: true, changeOrigin: false },

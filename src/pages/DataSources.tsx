@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 type Avail = 'live' | 'delayed' | 'estimate' | 'unavailable'
 
 const AVAIL: Record<Avail, { label: string; icon: typeof CheckCircle2; cls: string }> = {
-  live: { label: 'Live', icon: CheckCircle2, cls: 'text-[#39d239]' },
+  live: { label: 'Live', icon: CheckCircle2, cls: 'text-[#4ee39a]' },
   delayed: { label: 'Delayed', icon: Clock3, cls: 'text-accent' },
   estimate: { label: 'Estimate', icon: AlertTriangle, cls: 'text-warning' },
   unavailable: { label: 'Unavailable', icon: CircleSlash, cls: 'text-faint' },
@@ -129,9 +129,9 @@ function Health({ title, ok, warn, lines }: { title: string; ok: boolean; warn?:
   return (
     <Card className="p-4">
       <div className="flex items-center gap-2">
-        <Icon className={cn('size-4', ok ? 'text-[#39d239]' : warn ? 'text-warning' : 'text-[#ff7b7b]')} aria-hidden />
+        <Icon className={cn('size-4', ok ? 'text-[#4ee39a]' : warn ? 'text-warning' : 'text-[#ff7b7b]')} aria-hidden />
         <span className="text-sm font-semibold">{title}</span>
-        <span className={cn('ml-auto text-[11px] font-semibold', ok ? 'text-[#39d239]' : warn ? 'text-warning' : 'text-[#ff7b7b]')}>{ok ? 'Healthy' : warn ? 'Waiting' : 'Attention'}</span>
+        <span className={cn('ml-auto text-[11px] font-semibold', ok ? 'text-[#4ee39a]' : warn ? 'text-warning' : 'text-[#ff7b7b]')}>{ok ? 'Healthy' : warn ? 'Waiting' : 'Attention'}</span>
       </div>
       <ul className="mt-2 space-y-0.5 text-[12px] text-ink-2">
         {lines.map((l) => (

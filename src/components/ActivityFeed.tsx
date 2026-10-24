@@ -9,12 +9,12 @@ import { useNow } from '@/state/live'
 const ICONS: Record<ActivityEvent['type'], { icon: typeof LogIn; cls: string }> = {
   player_join: { icon: LogIn, cls: 'text-accent bg-accent-soft' },
   player_leave: { icon: LogOut, cls: 'text-muted bg-raised' },
-  purchase: { icon: CircleDollarSign, cls: 'text-[#39d239] bg-good/10' },
+  purchase: { icon: CircleDollarSign, cls: 'text-[#4ee39a] bg-good/10' },
   ccu_peak: { icon: TrendingUp, cls: 'text-warning bg-warning/10' },
   server_open: { icon: Server, cls: 'text-ink-2 bg-raised' },
   server_close: { icon: ServerOff, cls: 'text-serious bg-serious/10' },
   milestone: { icon: Award, cls: 'text-warning bg-warning/10' },
-  goal_reached: { icon: Target, cls: 'text-[#39d239] bg-good/10' },
+  goal_reached: { icon: Target, cls: 'text-[#4ee39a] bg-good/10' },
 }
 
 function who(d: Record<string, unknown>): string {
@@ -38,7 +38,7 @@ export function describe(e: ActivityEvent): { title: React.ReactNode; detail?: s
       return {
         title: (
           <>
-            <b className="font-semibold text-[#39d239]">R$ {num(Number(d.robux))}</b> · {String(d.productName ?? `Product ${d.productId}`)}
+            <b className="font-semibold text-[#4ee39a]">R$ {num(Number(d.robux))}</b> · {String(d.productName ?? `Product ${d.productId}`)}
           </>
         ),
         detail: `${d.kind === 'game_pass' ? 'Game pass (list price)' : 'Developer product'}${d.username ? ` · ${d.username}` : ''}`,

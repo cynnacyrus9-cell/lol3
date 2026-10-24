@@ -5,11 +5,11 @@ import { RevenueChart } from '@/components/charts/RevenueChart'
 import { ProductChart, useProducts } from '@/components/charts/ProductChart'
 import { StatCard, type Comparison } from '@/components/StatCard'
 import { ActivityFeed } from '@/components/ActivityFeed'
+import { ProductsTable } from '@/components/ProductsTable'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useApi, useLive, useNow } from '@/state/live'
-import { duration, num, pctChange, robux, shortDay, timeAgo } from '@/lib/format'
+import { duration, num, pctChange, robux, shortDay } from '@/lib/format'
 import { dayKey } from '@shared/time'
 import type { Summary } from './types'
 
@@ -19,11 +19,11 @@ function cmp(cur: number | null, prev: number | null | undefined, s: Summary | n
   return { pct: has ? pctChange(cur, prev ?? null) : null, label: s.range.prevLabel, fallback: has ? `— vs ${s.range.prevLabel}` : `No data for ${s.range.prevLabel}` }
 }
 
-export function Revenue() {
+export function Revenue({ defaultRange = { preset: 'today' }, showProducts = true }: { defaultRange?: RangeValue; showProducts?: boolean } = {}) {
   const { live, config, events, revenueVersion } = useLive()
   const now = useNow(30_000)
   const tz = config?.timezone ?? 'America/Los_Angeles'
-  const [range, setRange] = React.useState<RangeValue>({ preset: 'today' })
+  const [range, setRange] = React.useState<RangeValue>(defaultRange)
   const summary = useApi<Summary>(`/api/summary?${rangeQuery(range)}`, [revenueVersion])
   const products = useProducts(range)
   const s = summary.data
@@ -75,6 +75,8 @@ export function Revenue() {
 
       <RevenueChart range={range} height={300} />
 
+      {showProducts ? (
+      <>
       <div className="grid grid-cols-1 gap-5 xl:grid-cols-5">
         <div className="xl:col-span-3">
           <ProductChart range={range} />
@@ -100,42 +102,12 @@ export function Revenue() {
           </div>
         </CardHeader>
         <CardContent>
-          {products.loading && !products.data ? (
-            <Skeleton className="h-32 w-full" />
-          ) : !products.data?.products.length ? (
-            <p className="py-6 text-center text-sm text-muted">No sales in this range.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[560px] text-[13px]">
-                <thead>
-                  <tr className="text-left text-[11px] uppercase tracking-wider text-faint">
-                    <th className="pb-2 font-medium">Product</th>
-                    <th className="pb-2 font-medium">Type</th>
-                    <th className="pb-2 text-right font-medium">Sales</th>
-                    <th className="pb-2 text-right font-medium">Buyers</th>
-                    <th className="pb-2 text-right font-medium">Robux</th>
-                    <th className="pb-2 text-right font-medium">Last sale</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {products.data.products.map((r) => (
-                    <tr key={`${r.kind}:${r.productId}`} className="border-t border-line">
-                      <td className="py-2 text-ink">
-                        {r.name ?? '—'} <span className="text-[11px] text-faint">#{r.productId}</span>
-                      </td>
-                      <td className="py-2 text-ink-2">{r.kind === 'game_pass' ? 'Game pass' : 'Developer product'}</td>
-                      <td className="tabular py-2 text-right">{num(r.sales)}</td>
-                      <td className="tabular py-2 text-right text-ink-2">{num(r.buyers)}</td>
-                      <td className="tabular py-2 text-right font-medium">{robux(r.revenue)}</td>
-                      <td className="tabular py-2 text-right text-muted">{timeAgo(r.lastSoldAt, now)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <ProductsTable data={products.data} loading={products.loading} />
         </CardContent>
       </Card>
+
+      </>
+      ) : null}
 
       {s && s.daily.length > 1 ? (
         <Card>

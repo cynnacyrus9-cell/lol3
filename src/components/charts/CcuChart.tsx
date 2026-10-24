@@ -7,10 +7,22 @@ import { useApi, useLive } from '@/state/live'
 import { clock, dateTime, num } from '@/lib/format'
 
 const WINDOWS = ['5m', '15m', '1h', '6h', '24h', '7d'] as const
-type Win = (typeof WINDOWS)[number]
+export type Win = (typeof WINDOWS)[number]
 const SPAN: Record<Win, number> = { '5m': 5 * 60e3, '15m': 15 * 60e3, '1h': 3600e3, '6h': 6 * 3600e3, '24h': 24 * 3600e3, '7d': 7 * 86400e3 }
 
-export function CcuChart({ height = 260, defaultWindow = '1h' }: { height?: number; defaultWindow?: Win }) {
+export function CcuChart({
+  height = 260,
+  defaultWindow = '1h',
+  windows = WINDOWS,
+  title = 'Live player activity',
+  description = 'Concurrent players reported by your game servers',
+}: {
+  height?: number
+  defaultWindow?: Win
+  windows?: readonly Win[]
+  title?: string
+  description?: string
+}) {
   const { live, ccuTrail, config } = useLive()
   const tz = config?.timezone ?? 'America/Los_Angeles'
   const [win, setWin] = React.useState<Win>(defaultWindow)
@@ -35,8 +47,8 @@ export function CcuChart({ height = 260, defaultWindow = '1h' }: { height?: numb
   const hasOfficial = points.some((p) => p.official !== null && p.official !== undefined)
   return (
     <ChartFrame
-      title="Live player activity"
-      description="Concurrent players reported by your game servers"
+      title={title}
+      description={description}
       source="live"
       updatedAt={live?.serverTime}
       sourceNote="Stored once per minute; points after the last minute stream in live."
@@ -49,9 +61,9 @@ export function CcuChart({ height = 260, defaultWindow = '1h' }: { height?: numb
       controls={
         <Tabs value={win} onValueChange={(v) => setWin(v as Win)}>
           <TabsList>
-            {WINDOWS.map((w) => (
+            {windows.map((w) => (
               <TabsTrigger key={w} value={w}>
-                {w}
+                {w.toUpperCase()}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -62,8 +74,8 @@ export function CcuChart({ height = 260, defaultWindow = '1h' }: { height?: numb
         <AreaChart data={points} margin={{ top: 8, right: 8, bottom: 0, left: -12 }}>
           <defs>
             <linearGradient id="ccuFill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={HEX.primary} stopOpacity={0.35} />
-              <stop offset="100%" stopColor={HEX.primary} stopOpacity={0} />
+              <stop offset="0%" stopColor={HEX.primary} stopOpacity={0.75} />
+              <stop offset="100%" stopColor={HEX.primary} stopOpacity={0.25} />
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} strokeDasharray="0" />

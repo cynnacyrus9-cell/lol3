@@ -7,7 +7,7 @@ import { useNow } from '@/state/live'
 export type SourceKind = 'live' | 'polled' | 'computed' | 'unavailable' | 'stale'
 
 const META: Record<SourceKind, { label: string; icon: typeof Radio; cls: string; help: string }> = {
-  live: { label: 'Live · in-game', icon: Radio, cls: 'text-[#39d239]', help: 'Pushed by your Roblox game servers the moment it happens (event-driven).' },
+  live: { label: 'Live · in-game', icon: Radio, cls: 'text-[#4ee39a]', help: 'Pushed by your Roblox game servers the moment it happens (event-driven).' },
   polled: { label: 'Roblox API · polled', icon: Clock3, cls: 'text-accent', help: 'Fetched from the official Roblox API on a shared schedule. Roblox updates these counters with its own delay.' },
   computed: { label: 'Stored history', icon: Sigma, cls: 'text-ink-2', help: 'Computed from events stored in Cloudflare D1.' },
   unavailable: { label: 'Unavailable', icon: CircleSlash, cls: 'text-faint', help: 'No supported data source is configured or available for this value.' },

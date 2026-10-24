@@ -18,7 +18,8 @@
     "db:migrate:remote": "wrangler d1 migrations apply roadster-analytics --remote",
     "setup:secrets": "node scripts/setup-secrets.mjs",
     "deploy": "npm run build && wrangler d1 migrations apply roadster-analytics --remote && wrangler deploy",
-    "cf-typegen": "wrangler types worker/worker-configuration.d.ts"
+    "cf-typegen": "wrangler types worker/worker-configuration.d.ts",
+    "build:preview": "vite build -c vite.preview.config.ts"
   },
   "dependencies": {
     "@fontsource/jetbrains-mono": "^5.3.0",

@@ -318,6 +318,13 @@ node scripts/simulate-server.mjs --url http://127.0.0.1:8787 --secret <INGEST_SE
 "Development mode" banner. Synthetic rows are stored with `source = 'synthetic'`, and
 production (`APP_MODE=production`, the default) rejects them with HTTP 403.
 
+### Design preview (no backend)
+
+`npm run build:preview` builds `dist/preview/`. It is the same dashboard running on
+an in-browser **sample-data** generator (`src/preview/sim.ts`) with a permanent
+"Design preview with sample data" banner, so the design can be clicked through
+without deploying. It is never part of the deployed Worker.
+
 ## 6. Tests
 
 ```bash

@@ -51,6 +51,14 @@ function Shell() {
       <Header page={page} onNavigate={navigate} />
       <main className="mx-auto max-w-[1200px] px-3 py-3 sm:px-5 sm:py-4">
         {page === 'sources' || page === 'admin' ? <h2 className="mb-3 text-lg font-semibold tracking-tight">{TITLES[page]}</h2> : null}
+        {(window as unknown as { __RL_PREVIEW__?: boolean }).__RL_PREVIEW__ ? (
+          <div className="mb-3 flex items-center gap-2 rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-[12.5px] text-warning" role="alert">
+            <FlaskConical className="size-4 shrink-0" />
+            <span>
+              <b>Design preview with sample data.</b> Not connected to Roblox. Deploy the dashboard to see Roadster Life's real numbers.
+            </span>
+          </div>
+        ) : null}
         {live?.mode === 'development' ? (
           <div className="mb-3 flex items-center gap-2 rounded-xl border border-warning/40 bg-warning/10 px-4 py-2 text-[12.5px] text-warning" role="alert">
             <FlaskConical className="size-4 shrink-0" />

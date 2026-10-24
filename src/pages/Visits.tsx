@@ -7,6 +7,27 @@ import { Button } from '@/components/ui/button'
 import { useLive, useNow } from '@/state/live'
 import { clock, num, timeAgo } from '@/lib/format'
 import { dayStartUtc } from '@shared/time'
+import * as React from 'react'
+
+/**
+ * Live total = the official Roblox visit count + joins your game servers have
+ * reported since Roblox last changed that count. Every real join moves it within
+ * about a second. Roblox's counter can lag behind joins it has not yet counted, so
+ * the displayed total never steps backwards when a new official value arrives.
+ */
+function useLiveVisitTotal(): number | null {
+  const { live } = useLive()
+  const shown = React.useRef<number | null>(null)
+  const o = live?.official
+  if (!o || o.visits === null) {
+    shown.current = null
+    return null
+  }
+  const raw = o.visits + (o.trackedJoinsSinceUpdate ?? 0)
+  // Allow a reset if the configured universe changed (large drop).
+  if (shown.current === null || raw >= shown.current || shown.current - raw > 5_000) shown.current = raw
+  return shown.current
+}
 
 /**
  * The main screen: official total visits as the hero number, with the most
@@ -14,6 +35,7 @@ import { dayStartUtc } from '@shared/time'
  */
 export function Visits({ onOpenSettings }: { onOpenSettings: () => void }) {
   const { live, config } = useLive()
+  const liveTotal = useLiveVisitTotal()
   const now = useNow(1000)
   const tz = config?.timezone ?? 'America/Los_Angeles'
   const o = live?.official
@@ -43,7 +65,7 @@ export function Visits({ onOpenSettings }: { onOpenSettings: () => void }) {
             <Skeleton className="mx-auto h-24 w-3/4 max-w-xl" />
           ) : hasOfficial ? (
             <div className="hero-number text-[clamp(48px,min(11vw,11vh),128px)] font-bold leading-none text-ink">
-              <AnimatedNumber value={o!.visits} format={num} durationMs={1200} />
+              <AnimatedNumber value={liveTotal} format={num} durationMs={700} />
             </div>
           ) : (
             <div className="py-4">
@@ -73,8 +95,7 @@ export function Visits({ onOpenSettings }: { onOpenSettings: () => void }) {
           </div>
           {hasOfficial ? (
             <p className="mt-2 text-[11px] text-faint">
-              Roblox counter checked {timeAgo(o!.fetchedAt, now)}
-              {o!.trackedJoinsSinceUpdate > 0 ? ` · +${num(o!.trackedJoinsSinceUpdate)} joins seen in-game since Roblox last updated it` : ''}
+              Official Roblox count {num(o!.visits)} (checked {timeAgo(o!.fetchedAt, now)}) + {num(o!.trackedJoinsSinceUpdate)} joins reported live by your servers since
             </p>
           ) : null}
         </div>

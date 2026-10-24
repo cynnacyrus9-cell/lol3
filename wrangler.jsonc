@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "roadster-life-analytics",
+  // Cloudflare account to deploy to (not a secret; the API token stays out of the repo).
+  "account_id": "4c6831fba4841e3de2b6edee48f9c38e",
   "main": "worker/index.ts",
   "compatibility_date": "2026-10-01",
   "observability": { "enabled": true },
